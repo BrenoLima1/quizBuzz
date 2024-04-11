@@ -1,18 +1,22 @@
-// 50 minutes
-
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { React, useState, useEffect } from "react";
 import { OPQuestions } from "../config/question";
 import tw from "twrnc";
+import * as Progress from 'react-native-progress';
 
-const Questions = () => {
+import Score from "./Score";
+
+const Questions = ({navigation}) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [isCorrect, setIsCorrect] = useState(null);
   const [disableOptions, setDisableOptions] = useState(false);
+  const [quizProgress, setQuizProgress] = useState(OPQuestions.length);
 
-  console.log(score);
+  const progress = (currentQuestionIndex + 1) / quizProgress;
+
+  console.log(currentQuestionIndex);
   console.log({isCorrect});
 
   useEffect(() => {
@@ -23,16 +27,18 @@ const Questions = () => {
       setIsCorrect(isAnswerCorrect);
 
       if (isAnswerCorrect) {
-        setScore((prevScore) => prevScore + 10);
+        setScore((prevScore) => prevScore + 20);
       }
 
       setDisableOptions(true);
     }
   }, [selectedOption]);
 
+  // handle next press
+
   const handleNext = () => {
     if (currentQuestionIndex === OPQuestions.length - 1) {
-      // return;
+      navigation.navigate("Score", {score:score});
 
     } else {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -49,6 +55,11 @@ const Questions = () => {
 
   return (
     <View style={tw`mt-6 p-4`}>
+      <View style={tw`flex-row`}>
+        <View style={tw`flex-1`}>
+          <Progress.Bar progress={progress} width={null} height={20} color="red" />
+        </View>
+      </View>
       <Text style={tw`text-2xl mb-4`}>
         {OPQuestions[currentQuestionIndex].question}
       </Text>
@@ -76,7 +87,11 @@ const Questions = () => {
         style={tw`bg-purple-500 p-2 rounded-md mt-6`}
         onPress={handleNext}
       >
-        <Text style={tw`text-white text-lg text-center font-bold`}>Next</Text>
+        <Text style={tw`text-white text-lg text-center font-bold`}>{
+          currentQuestionIndex === OPQuestions.length - 1
+            ? "Finish"
+            : "Next"
+        }</Text>
       </Pressable>
     </View>
   );
